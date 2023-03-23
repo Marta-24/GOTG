@@ -10,6 +10,8 @@ namespace Game
         public float Velocity;
         public float GamepadDeadZone;
         public float RotationSpeed;
+
+        public float WalkTreshold;
     }
     class CharacterControllerSystem : Behaviour
     {
@@ -21,6 +23,7 @@ namespace Game
             characterControllerIt = GetComponentIterator<CharacterController>();
             transformIt = GetComponentIterator<Transform3D>();
             rigidBodyIt = GetComponentIterator<CollisionBody>();
+            Animator.PlayAnimationName("walk", m_EntityId);
         }
 
         void Update()
@@ -30,12 +33,14 @@ namespace Game
             ref CollisionBody rb = ref GetComponentByIterator<CollisionBody>(rigidBodyIt);
 
             Vector3 input = GetInput(ref controller);
-            input *= controller.Velocity * Time.DeltaTimeMS();
+            Vector3 velocity = input * controller.Velocity * Time.DeltaTimeMS();
 
-            PhysicsManager.SetLinearVelocity(m_EntityId, input);
+            PhysicsManager.SetLinearVelocity(m_EntityId, velocity);
 
             if(input != Vector3Values.zero)
                 SetPlayerRotation(ref transform.LocalRotation, input, controller.RotationSpeed);
+
+            UpdateAnimation(input, controller);
         }
 
         Vector3 GetInput(ref CharacterController controller)
@@ -70,6 +75,28 @@ namespace Game
         {
             float angle = Mathf.Atan2(input.x, input.z) * Mathf.Rad2Deg;
             currentRotation.y = Mathf.LerpAngle(currentRotation.y, angle, rotationSpeed);
+        }
+        void UpdateAnimation(Vector3 input, CharacterController controller)
+        {
+            //if (input == Vector3Values.zero)
+            //{
+            //    Animator.PlayAnimationName("idle", m_EntityId);
+            //    Console.WriteLine("Player Idle");
+            //    return;
+            //}
+
+            //float mag = input.magnitude;
+            //Mathf.Clamp01(mag);
+
+            //if (mag <= controller.WalkTreshold)
+            //{
+            //    Animator.PlayAnimationName("walk", m_EntityId);
+            //    Console.WriteLine("Player Walk");
+            //    return;
+            //}
+            //Animator.PlayAnimationName("run", m_EntityId);
+            //Console.WriteLine("Player Run");
+            
         }
     }
 }
